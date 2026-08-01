@@ -1,0 +1,26 @@
+{
+  "name": "perfonext-testbed",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Synthetic Next.js testbed for the perfonext MCP servers. Baseline (correct) vs regressed (planted defects) with a ground-truth manifest.",
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "harness"
+  ],
+  "scripts": {
+    "collect:build": "node harness/collect/build.mjs",
+    "collect:profile": "node harness/collect/profile.mjs",
+    "collect:render": "node harness/collect/render.mjs",
+    "collect:adversarial": "node harness/collect/adversarial.mjs",
+    "collect:all": "npm run collect:build && npm run collect:profile && npm run collect:adversarial",
+    "harness": "node harness/run.mjs",
+    "harness:build": "node harness/run.mjs --lane=build",
+    "harness:profiler": "node harness/run.mjs --lane=profiler",
+    "harness:render": "node harness/run.mjs --lane=render",
+    "clean": "rm -rf artifacts apps/*/.next apps/*/.next-* harness/reports"
+  },
+  "engines": {
+    "node": ">=20.10.0"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "name": "@testbed/regressed",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3200",
+    "build": "next build",
+    "build:render": "next build --profile",
+    "start": "next start -p 3200"
+  },
+  "dependencies": {
+    "@testbed/compute": "0.1.0",
+    "@testbed/data": "0.1.0",
+    "@testbed/ui": "0.1.0",
+    "jspdf": "2.5.2",
+    "lodash": "3.10.1",
+    "next": "15.1.5",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "react-feather": "2.0.10",
+    "recharts": "2.13.3"
+  },
+  "devDependencies": {
+    "@types/lodash": "4.17.13",
+    "@types/node": "20.17.9",
+    "@types/react": "19.0.1",
+    "@types/react-dom": "19.0.2",
+    "react-scan": "0.5.7",
+    "typescript": "5.7.2",
+    "webpack-stats-plugin": "1.1.3"
+  }
+}

@@ -1,0 +1,22 @@
+node_modules/
+
+# Next.js build output
+.next/
+apps/*/.next/
+apps/*/.next-*/
+
+# Generated testbed artifacts and reports
+artifacts/
+fixtures/adversarial/
+harness/reports/
+
+# Local CPU profile output
+.perf-profiles/
+*.cpuprofile
+
+# Local OS and npm files
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*

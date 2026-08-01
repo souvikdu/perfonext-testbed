@@ -1,0 +1,289 @@
+{
+  "$comment": [
+    "Ground truth for the testbed. Every planted defect has an entry naming the tool that",
+    "should surface it and the assertion that proves it did.",
+    "",
+    "expectedFail: true means the assertion currently does NOT hold and that is a known",
+    "bug in the MCP server under test, documented in that repo's REVIEW.md. The harness",
+    "reports these separately and does not fail the run. When one starts passing, the",
+    "underlying bug has been fixed and the flag should be removed.",
+    "",
+    "pendingFixture: true means the defect is not yet correctly planted in the testbed.",
+    "That is our gap, not the server's, and it is tracked separately so it is never",
+    "mistaken for a passing test.",
+    "",
+    "Assertion ops: includes, notIncludes, equals, gt, gte, lt, lte, matches, lengthGte,",
+    "isError, noError. Paths support dot access and [*] to flatten an array."
+  ],
+
+  "build": [
+    {
+      "id": "B0-control",
+      "title": "Baseline reports substantially fewer problems than regressed",
+      "tool": "suggest_optimizations",
+      "target": "baseline",
+      "why": "False-positive control. Note the baseline still gets a 'critical' of its own: severity is keyed to absolute byte thresholds, not to the size of the app, so a small well-built app is graded like a large bloated one.",
+      "assert": [{ "path": "suggestionCount", "op": "lte", "value": 4 }]
+    },
+    {
+      "id": "B1",
+      "title": "Heavy statically-imported route is flagged for code splitting",
+      "tool": "suggest_optimizations",
+      "target": "regressed",
+      "assert": [{ "path": "suggestions[*].kind", "op": "includes", "value": "code-split-route" }]
+    },
+    {
+      "id": "B1-rank",
+      "title": "/report is the heaviest route in the regressed build",
+      "tool": "get_largest_routes",
+      "target": "regressed",
+      "why": "Route keys come straight from app-build-manifest.json, so App Router entries carry the internal /page suffix.",
+      "assert": [{ "path": "routes[0].path", "op": "equals", "value": "/report/page" }]
+    },
+    {
+      "id": "B2",
+      "title": "A package dominating a widely-shared chunk is identified",
+      "tool": "explain_shared_chunks",
+      "target": "regressed",
+      "assert": [
+        { "path": "sharedChunks[0].routeCount", "op": "gte", "value": 5 },
+        { "path": "sharedChunks[0].sizeBytes", "op": "gt", "value": 200000 }
+      ]
+    },
+    {
+      "id": "B3",
+      "title": "Two resolved copies of lodash are reported as duplicates",
+      "tool": "find_duplicates",
+      "target": "regressed",
+      "why": "Never once exercised before this testbed: weather-app returned duplicateCount 0.",
+      "assert": [
+        { "path": "duplicateCount", "op": "gte", "value": 1 },
+        { "path": "duplicates[*].packageName", "op": "includes", "value": "lodash" }
+      ]
+    },
+    {
+      "id": "B4",
+      "title": "The react-feather barrel is flagged for optimizePackageImports",
+      "tool": "suggest_optimizations",
+      "target": "regressed",
+      "pendingFixture": true,
+      "why": "NOT PLANTED YET. trace_import finds a single 2 KB react-feather module, so the whole barrel is not actually being pulled in and there is nothing for the tool to detect. The fixture needs enough distinct icons imported across >= 2 client routes, with optimizePackageImports absent, before this assertion means anything. react-feather is used because Next's built-in optimizePackageImports list already covers the popular icon packs.",
+      "assert": [
+        { "path": "suggestions[*].kind", "op": "includes", "value": "optimize-package-imports" }
+      ]
+    },
+    {
+      "id": "B5",
+      "title": "Shared baseline weight is called out",
+      "tool": "suggest_optimizations",
+      "target": "regressed",
+      "assert": [
+        { "path": "suggestions[*].kind", "op": "includes", "value": "audit-shared-baseline" }
+      ]
+    },
+    {
+      "id": "B6-growth",
+      "title": "Growth between the two builds is detected and attributed",
+      "tool": "explain_growth",
+      "target": "diff",
+      "assert": [
+        { "path": "overall.totalDeltaBytes", "op": "gt", "value": 0 },
+        { "path": "overall.severity", "op": "notIncludes", "value": "none" },
+        { "path": "routeFindings[*].path", "op": "includes", "value": "/report/page" }
+      ]
+    },
+    {
+      "id": "B6-compare",
+      "title": "compare_builds ranks /report as a top grower",
+      "tool": "compare_builds",
+      "target": "diff",
+      "assert": [
+        { "path": "totalChunkDeltaBytes", "op": "gt", "value": 0 },
+        { "path": "routeDeltas[*].path", "op": "includes", "value": "/report/page" }
+      ]
+    },
+    {
+      "id": "B7-css",
+      "title": "CSS growth is reported without inventing phantom chunks",
+      "tool": "compare_builds",
+      "target": "diff",
+      "why": "Content-hashed CSS filenames differ between builds; naive matching reports the whole stylesheet as new on both sides.",
+      "assert": [{ "path": "chunkDeltas[*].chunkPath", "op": "matches", "value": "\\.css$" }]
+    },
+    {
+      "id": "B8a",
+      "title": "Vendored react-dom is not split from the direct copy",
+      "tool": "find_duplicates",
+      "target": "regressed",
+      "expectedFail": true,
+      "why": "extractPackageName takes the LAST node_modules segment, so next/dist/compiled/react-dom buckets as 'next'. See perfonext-build-mcp/REVIEW.md H2.",
+      "assert": [
+        { "path": "duplicates[*].packageName", "op": "includes", "value": "react-dom" }
+      ]
+    },
+    {
+      "id": "B8b",
+      "title": "A package is never reported as larger than the chunk containing it",
+      "tool": "explain_shared_chunks",
+      "target": "regressed",
+      "expectedFail": true,
+      "why": "topPackages.bytes is raw unminified module size while sizeBytes is the emitted chunk size. See perfonext-build-mcp/REVIEW.md H1.",
+      "assert": [{ "path": "$custom", "op": "packageBytesWithinChunk" }]
+    },
+    {
+      "id": "B9-layout",
+      "title": "The synthetic /layout key is not reported as a user-facing route",
+      "tool": "get_largest_routes",
+      "target": "regressed",
+      "expectedFail": true,
+      "why": "app-build-manifest.json records root-layout client components under a /layout key. It is not a route, and counting it also gives layout-mounted chunks routeCount 1 so they never register as shared.",
+      "assert": [{ "path": "routes[*].path", "op": "notIncludes", "value": "/layout" }]
+    }
+  ],
+
+  "profiler": [
+    {
+      "id": "P0-control",
+      "title": "The efficient variant burns far less CPU than the slow one",
+      "tool": "get_profile_summary",
+      "target": "fast",
+      "assert": [{ "path": "sampleCount", "op": "lt", "value": 5000 }]
+    },
+    {
+      "id": "P1",
+      "title": "read_source_context shows the lines that actually carry the ticks",
+      "tool": "read_source_context",
+      "target": "slow",
+      "expectedFail": true,
+      "why": "scoreTrail is declared at line 31 but its hot lines are 63-82. The window is a fixed +/-10 around the declaration and explain_function hardcodes it with no override, so the output is all-zero ticks with no warning. See perfonext-profiler-mcp/REVIEW.md H1.",
+      "assert": [{ "path": "$custom", "op": "hotLinesVisible" }]
+    },
+    {
+      "id": "P2",
+      "title": "The quadratic scan is a top hotspot",
+      "tool": "get_hotspots",
+      "target": "slow",
+      "assert": [{ "path": "hotspots[*].function", "op": "includes", "value": "findNearbyTrails" }]
+    },
+    {
+      "id": "P5",
+      "title": "CPU spent inside npm packages is attributed",
+      "tool": "get_package_costs",
+      "target": "slow",
+      "why": "Never exercised before this testbed: aqi-monitoring's profile was 100% user code, so this returned 'No npm package frames found'.",
+      "assert": [{ "path": "packages", "op": "lengthGte", "value": 1 }]
+    },
+    {
+      "id": "P-suggest",
+      "title": "Optimization patterns are detected in the slow variant",
+      "tool": "suggest_optimizations",
+      "target": "slow",
+      "assert": [{ "path": "suggestions", "op": "lengthGte", "value": 3 }]
+    },
+    {
+      "id": "P8",
+      "title": "A directory of profiles is accepted",
+      "tool": "load_profile",
+      "target": "slow-dir",
+      "expectedFail": true,
+      "why": "One run with worker_threads emits three .cpuprofile files. load_profile takes a single filePath, so the caller must pick the main thread by hand. This is the deferred multi-file roadmap item; the fixture shows the need is real.",
+      "assert": [{ "path": "$response", "op": "noError" }]
+    }
+  ],
+
+  "render": [
+    {
+      "id": "R0-control",
+      "title": "Baseline produces far fewer commits than regressed",
+      "tool": "get_render_summary",
+      "target": "baseline",
+      "assert": [{ "path": "commitCount", "op": "lt", "value": 30 }]
+    },
+    {
+      "id": "R-quality",
+      "title": "Live capture yields exact change descriptions",
+      "tool": "get_render_summary",
+      "target": "regressed",
+      "why": "Requires a headed browser AND a React profiling build. A plain next start silently yields commitCount 0.",
+      "assert": [{ "path": "dataQuality", "op": "equals", "value": "exact" }]
+    },
+    {
+      "id": "R1",
+      "title": "The rerender storm is visible as a much higher commit count",
+      "tool": "get_render_summary",
+      "target": "regressed",
+      "assert": [{ "path": "commitCount", "op": "gte", "value": 30 }]
+    },
+    {
+      "id": "R2",
+      "title": "Rerender causes are attributed with exact evidence",
+      "tool": "get_rerender_causes",
+      "target": "regressed",
+      "assert": [
+        { "path": "dataQuality", "op": "equals", "value": "exact" },
+        { "path": "causes", "op": "lengthGte", "value": 5 },
+        { "path": "causes[0].evidence", "op": "lengthGte", "value": 1 }
+      ]
+    },
+    {
+      "id": "R4",
+      "title": "Expensive components are ranked",
+      "tool": "get_slow_components",
+      "target": "regressed",
+      "assert": [{ "path": "slowComponents", "op": "lengthGte", "value": 5 }]
+    },
+    {
+      "id": "R9",
+      "title": "Hot commits are identified",
+      "tool": "get_hot_commits",
+      "target": "regressed",
+      "assert": [{ "path": "hotCommits", "op": "lengthGte", "value": 3 }]
+    }
+  ],
+
+  "adversarial": [
+    {
+      "id": "X1",
+      "title": "A truncated profile fails cleanly rather than crashing",
+      "server": "profiler",
+      "tool": "load_profile",
+      "fixture": "x1-truncated-profile",
+      "assert": [{ "path": "$response", "op": "isError" }]
+    },
+    {
+      "id": "X2",
+      "title": "A zero-sample profile does not crash the parser",
+      "server": "profiler",
+      "tool": "load_profile",
+      "fixture": "x2-zero-sample-profile",
+      "expectedFail": true,
+      "why": "Fails with a raw internal TypeError: 'Cannot read properties of undefined (reading selfTime)'. A profile with no samples is exactly what a mis-collected run produces, so this is the first thing a new user is likely to hit, and the message tells them nothing about what went wrong or how to fix it.",
+      "assert": [{ "path": "$response", "op": "noError" }]
+    },
+    {
+      "id": "X3",
+      "title": "Stats written without ids/modulesSpace produce a warning, not silence",
+      "server": "build",
+      "tool": "load_webpack_stats",
+      "fixture": "x3-collapsed-stats",
+      "why": "This is the exact silent-failure the collection recipe exists to prevent.",
+      "assert": [{ "path": "$text", "op": "matches", "value": "(?i)warn|no usable|0 modules" }]
+    },
+    {
+      "id": "X4",
+      "title": "A manifest from another Next.js major is handled",
+      "server": "build",
+      "tool": "load_build_stats",
+      "fixture": "x4-version-skew",
+      "assert": [{ "path": "$response", "op": "noError" }]
+    },
+    {
+      "id": "X5",
+      "title": "An empty build directory produces a clear error",
+      "server": "build",
+      "tool": "load_build_stats",
+      "fixture": "x5-empty",
+      "assert": [{ "path": "$response", "op": "isError" }]
+    }
+  ]
+}
