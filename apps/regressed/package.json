@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@types/lodash": "4.17.13",
-    "@types/node": "20.17.9",
+    "@types/node": "26.1.2",
     "@types/react": "19.0.1",
     "@types/react-dom": "19.0.2",
     "react-scan": "0.5.7",
