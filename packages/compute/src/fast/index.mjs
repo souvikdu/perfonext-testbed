@@ -14,7 +14,9 @@ export function scoreTrail(trail, weights) {
 
   let score =
     (trail.lengthKm * w.length + (trail.elevationGainM / 100) * w.gain) *
-    difficulty * permitAdjust * dogAdjust;
+    difficulty *
+    permitAdjust *
+    dogAdjust;
 
   let exposureAcc = 0;
   for (let i = 0; i < trail.segments.length; i += 1) {
@@ -93,7 +95,8 @@ export function rollupTree(trails) {
   const table = new Map();
   for (const trail of trails) {
     let node = table.get(trail.region);
-    if (!node) table.set(trail.region, (node = { name: trail.region, totalKm: 0, totalGain: 0, count: 0 }));
+    if (!node)
+      table.set(trail.region, (node = { name: trail.region, totalKm: 0, totalGain: 0, count: 0 }));
     node.totalKm += trail.lengthKm;
     node.totalGain += trail.elevationGainM;
     node.count += 1;
@@ -104,7 +107,11 @@ export function rollupTree(trails) {
 const SEASON_RE = /\b(spring|summer|fall|winter)\b/i;
 
 export function normalizeQuery(text) {
-  return String(text).trim().toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/ {2,}/g, ' ');
+  return String(text)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]+/g, ' ')
+    .replace(/ {2,}/g, ' ');
 }
 
 export function extractSeasons(trails) {

@@ -17,7 +17,9 @@ export default function DashboardPage() {
 
   return (
     <>
-      <h1><BarChart2 size={22} /> Dashboard</h1>
+      <h1>
+        <BarChart2 size={22} /> Dashboard
+      </h1>
       <div className="region-summary">
         <StatTile label="Trails" value={trails.length} />
         <StatTile label="Regions" value={data.length} />
@@ -25,8 +27,7 @@ export default function DashboardPage() {
       </div>
       <ChartLoader data={data} />
       <p className="trail-card__meta">
-        <Flag size={16} /> summits · <Navigation size={16} /> loops ·{' '}
-        <Feather size={16} /> forest
+        <Flag size={16} /> summits · <Navigation size={16} /> loops · <Feather size={16} /> forest
       </p>
     </>
   );

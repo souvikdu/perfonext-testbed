@@ -36,10 +36,14 @@ export default function LegacyExport({ rows }: Props) {
   return (
     <main style={{ padding: 24, fontFamily: 'system-ui' }}>
       <h1>Legacy export</h1>
-      <button type="button" onClick={onExport}>Export ({status})</button>
+      <button type="button" onClick={onExport}>
+        Export ({status})
+      </button>
       <ul>
         {rows.slice(0, 20).map((r) => (
-          <li key={r.slug}>{r.slug} — {r.region}</li>
+          <li key={r.slug}>
+            {r.slug} — {r.region}
+          </li>
         ))}
       </ul>
     </main>

@@ -1,5 +1,5 @@
-declare module "webpack-stats-plugin" {
-  import type { WebpackPluginInstance } from "webpack";
+declare module 'webpack-stats-plugin' {
+  import type { WebpackPluginInstance } from 'webpack';
 
   interface StatsWriterPluginOptions {
     filename?: string;

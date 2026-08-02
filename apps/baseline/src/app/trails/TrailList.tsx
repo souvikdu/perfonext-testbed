@@ -5,7 +5,11 @@ import type { Trail } from '@testbed/data';
 
 import { TrailGroup } from './TrailGroup';
 
-function TrailListImpl({ trails, selected, onSelect }: {
+function TrailListImpl({
+  trails,
+  selected,
+  onSelect,
+}: {
   trails: Trail[];
   selected: string | null;
   onSelect: (slug: string) => void;
@@ -23,7 +27,13 @@ function TrailListImpl({ trails, selected, onSelect }: {
   return (
     <div data-testid="trail-list">
       {groups.map(([region, list]) => (
-        <TrailGroup key={region} region={region} trails={list} selected={selected} onSelect={onSelect} />
+        <TrailGroup
+          key={region}
+          region={region}
+          trails={list}
+          selected={selected}
+          onSelect={onSelect}
+        />
       ))}
     </div>
   );

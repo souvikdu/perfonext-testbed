@@ -21,7 +21,12 @@ function summarise(trail: Trail) {
   return { hash: text.length, steepest: sorted[0]?.id ?? '', vocabulary: unique.size };
 }
 
-export function TrailCard({ trail, isSelected, onSelect, theme }: {
+export function TrailCard({
+  trail,
+  isSelected,
+  onSelect,
+  theme,
+}: {
   trail: Trail;
   isSelected: boolean;
   onSelect: (slug: string) => void;
@@ -36,7 +41,10 @@ export function TrailCard({ trail, isSelected, onSelect, theme }: {
       data-slug={trail.slug}
       onClick={() => onSelect(trail.slug)}
     >
-      <h3>{trail.name}{isSelected ? ' ★' : ''}</h3>
+      <h3>
+        {trail.name}
+        {isSelected ? ' ★' : ''}
+      </h3>
       <TrailStatRow
         distance={formatDistance(trail.lengthKm)}
         gain={trail.elevationGainM}

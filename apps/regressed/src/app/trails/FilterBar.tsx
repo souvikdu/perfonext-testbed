@@ -4,7 +4,12 @@ import type { Filters } from './FiltersContext';
 
 // No memo — and the props it receives are new objects on every parent render, so
 // memo would not have helped anyway. That pairing is the point of the fixture.
-export function FilterBar({ filters, regions, difficulties, onFilterChange }: {
+export function FilterBar({
+  filters,
+  regions,
+  difficulties,
+  onFilterChange,
+}: {
   filters: Filters;
   regions: string[];
   difficulties: string[];
@@ -25,7 +30,9 @@ export function FilterBar({ filters, regions, difficulties, onFilterChange }: {
       >
         <option value="all">All regions</option>
         {regions.map((r) => (
-          <option key={r} value={r}>{r}</option>
+          <option key={r} value={r}>
+            {r}
+          </option>
         ))}
       </select>
       <select
@@ -35,7 +42,9 @@ export function FilterBar({ filters, regions, difficulties, onFilterChange }: {
       >
         <option value="all">All difficulties</option>
         {difficulties.map((d) => (
-          <option key={d} value={d}>{d}</option>
+          <option key={d} value={d}>
+            {d}
+          </option>
         ))}
       </select>
     </div>

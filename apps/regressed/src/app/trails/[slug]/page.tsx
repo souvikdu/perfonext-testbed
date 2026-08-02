@@ -26,7 +26,13 @@ export default async function TrailDetailPage({ params }: { params: Promise<{ sl
       <h2>Segments</h2>
       <table>
         <thead>
-          <tr><th>Segment</th><th>Length</th><th>Gain</th><th>Surface</th><th>Grade</th></tr>
+          <tr>
+            <th>Segment</th>
+            <th>Length</th>
+            <th>Gain</th>
+            <th>Surface</th>
+            <th>Grade</th>
+          </tr>
         </thead>
         <tbody>
           {trail.segments.map((seg) => (

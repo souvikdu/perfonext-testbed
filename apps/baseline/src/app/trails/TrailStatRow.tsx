@@ -3,7 +3,12 @@
 import { memo } from 'react';
 import { TrailBadge } from '@testbed/ui';
 
-function TrailStatRowImpl({ distance, gain, difficulty, features }: {
+function TrailStatRowImpl({
+  distance,
+  gain,
+  difficulty,
+  features,
+}: {
   distance: string;
   gain: number;
   difficulty: string;
@@ -14,7 +19,9 @@ function TrailStatRowImpl({ distance, gain, difficulty, features }: {
       {distance} · {gain} m · {difficulty}
       <div>
         {features.map((f) => (
-          <TrailBadge key={f} tone="cool">{f}</TrailBadge>
+          <TrailBadge key={f} tone="cool">
+            {f}
+          </TrailBadge>
         ))}
       </div>
     </div>

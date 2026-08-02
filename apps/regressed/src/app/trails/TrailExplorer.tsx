@@ -14,7 +14,11 @@ import { FiltersProvider, useFilters } from './FiltersContext';
 import { FilterBar } from './FilterBar';
 import { TrailList } from './TrailList';
 
-function ExplorerBody({ trails, regions, difficulties }: {
+function ExplorerBody({
+  trails,
+  regions,
+  difficulties,
+}: {
   trails: Trail[];
   regions: string[];
   difficulties: string[];
@@ -56,7 +60,11 @@ function ExplorerBody({ trails, regions, difficulties }: {
   );
 }
 
-export function TrailExplorer(props: { trails: Trail[]; regions: string[]; difficulties: string[] }) {
+export function TrailExplorer(props: {
+  trails: Trail[];
+  regions: string[];
+  difficulties: string[];
+}) {
   return (
     <FiltersProvider>
       <ExplorerBody {...props} />

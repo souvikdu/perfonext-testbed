@@ -67,14 +67,16 @@ export function scoreTrail(trail, weights) {
     const density = tokens.reduce((acc, t) => acc + t.length, 0) / tokens.length;
     exposureAcc += exposureCost;
     score += gradeCost * seg.lengthKm + seg.gainM / 1000 + density / 100;
-    breakdown.push(Object.assign({}, seg, {
-      label: segLabel,
-      gradeCost,
-      exposureCost,
-      density,
-      tokens: tokens.slice(0, 8),
-      weighted: score,
-    }));
+    breakdown.push(
+      Object.assign({}, seg, {
+        label: segLabel,
+        gradeCost,
+        exposureCost,
+        density,
+        tokens: tokens.slice(0, 8),
+        weighted: score,
+      }),
+    );
   }
 
   for (let r = 0; r < reviewCount; r += 1) {

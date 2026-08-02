@@ -24,7 +24,7 @@ const require = createRequire(import.meta.url);
 const WORKER_PATH = require.resolve('@testbed/compute/worker');
 
 function flag(name, fallback) {
-  const match = process.argv.slice(2).find(arg => arg.startsWith(`--${name}=`));
+  const match = process.argv.slice(2).find((arg) => arg.startsWith(`--${name}=`));
   return match ? match.slice(name.length + 3) : fallback;
 }
 
@@ -43,11 +43,11 @@ function spawnWorker(shard) {
       workerData: { variant, count: 1200, seed: 20260731, shard },
     });
     let payload = null;
-    worker.on('message', message => {
+    worker.on('message', (message) => {
       payload = message;
     });
     worker.on('error', rejectPromise);
-    worker.on('exit', code => {
+    worker.on('exit', (code) => {
       if (code === 0) {
         resolvePromise(payload);
         return;
@@ -90,7 +90,7 @@ async function main() {
   );
 }
 
-main().catch(error => {
+main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });

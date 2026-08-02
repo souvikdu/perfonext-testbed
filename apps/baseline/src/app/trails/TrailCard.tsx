@@ -6,7 +6,11 @@ import { formatDistance } from '@testbed/ui';
 
 import { TrailStatRow } from './TrailStatRow';
 
-function TrailCardImpl({ trail, isSelected, onSelect }: {
+function TrailCardImpl({
+  trail,
+  isSelected,
+  onSelect,
+}: {
   trail: Trail;
   isSelected: boolean;
   onSelect: (slug: string) => void;
@@ -18,7 +22,10 @@ function TrailCardImpl({ trail, isSelected, onSelect }: {
       data-slug={trail.slug}
       onClick={() => onSelect(trail.slug)}
     >
-      <h3>{trail.name}{isSelected ? ' ★' : ''}</h3>
+      <h3>
+        {trail.name}
+        {isSelected ? ' ★' : ''}
+      </h3>
       <TrailStatRow
         distance={formatDistance(trail.lengthKm)}
         gain={trail.elevationGainM}

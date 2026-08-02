@@ -19,8 +19,15 @@ type FiltersValue = {
 const FiltersContext = createContext<FiltersValue | null>(null);
 
 export function FiltersProvider({ children }: { children: ReactNode }) {
-  const [filters, setFiltersState] = useState<Filters>({ query: '', region: 'all', difficulty: 'all' });
+  const [filters, setFiltersState] = useState<Filters>({
+    query: '',
+    region: 'all',
+    difficulty: 'all',
+  });
   const [selected, setSelected] = useState<string | null>(null);
+  // Planted defect: setter is deliberately never called so the render counter
+  // never advances via setState.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [renders, setRenders] = useState(0);
 
   // Recreated every render — no useMemo, no useCallback.

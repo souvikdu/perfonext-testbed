@@ -30,7 +30,7 @@ export const APPS = {
 };
 
 function waitForExit(child) {
-  return new Promise(resolvePromise => child.once('exit', resolvePromise));
+  return new Promise((resolvePromise) => child.once('exit', resolvePromise));
 }
 
 async function waitForServer(url, timeoutMs = 60_000) {
@@ -44,7 +44,7 @@ async function waitForServer(url, timeoutMs = 60_000) {
     } catch {
       // not up yet
     }
-    await new Promise(r => setTimeout(r, 400));
+    await new Promise((r) => setTimeout(r, 400));
   }
   throw new Error(`${url} did not become ready within ${timeoutMs}ms`);
 }
@@ -63,7 +63,7 @@ async function startApp(variant) {
   });
 
   child.stdout.on('data', () => {});
-  child.stderr.on('data', chunk => process.stderr.write(chunk));
+  child.stderr.on('data', (chunk) => process.stderr.write(chunk));
 
   const baseUrl = `http://127.0.0.1:${app.port}`;
   try {
@@ -79,7 +79,7 @@ async function startApp(variant) {
     baseUrl,
     async stop() {
       child.kill('SIGTERM');
-      await Promise.race([waitForExit(child), new Promise(r => setTimeout(r, 5_000))]);
+      await Promise.race([waitForExit(child), new Promise((r) => setTimeout(r, 5_000))]);
       child.kill('SIGKILL');
     },
   };
@@ -138,9 +138,9 @@ async function driveInteractions(page, baseUrl) {
     }
   }
 
-  const regionValues = await region.locator('option').evaluateAll(options =>
-    options.slice(0, 2).map(option => option.value),
-  );
+  const regionValues = await region
+    .locator('option')
+    .evaluateAll((options) => options.slice(0, 2).map((option) => option.value));
   for (let index = 0; index < 8; index += 1) {
     await region.selectOption(regionValues[index % regionValues.length]);
     await page.waitForTimeout(120);
@@ -197,28 +197,28 @@ export async function captureRenderSession({ client, variant, headless = false }
 
     // Without this, a failed `import('react-scan/lite')` inside the instrument
     // component is completely silent and the only symptom is commitCount: 0.
-    page.on('pageerror', error => console.error(`[page error] ${error.message}`));
-    page.on('console', message => {
+    page.on('pageerror', (error) => console.error(`[page error] ${error.message}`));
+    page.on('console', (message) => {
       if (message.type() === 'error' || message.type() === 'warning') {
         const location = message.location();
         const source = location.url ? ` ${location.url}` : '';
         console.error(`[page ${message.type()}] ${message.text()}${source}`);
       }
     });
-    page.on('requestfailed', request => {
+    page.on('requestfailed', (request) => {
       console.error(`[requestfailed] ${request.url()} ${request.failure()?.errorText}`);
     });
 
     // A 404 is a successful HTTP response, so requestfailed never fires for it. Without
     // this, a wrong ingest URL or a missing chunk shows up only as commitCount: 0.
-    page.on('response', response => {
+    page.on('response', (response) => {
       if (response.status() >= 400) {
         console.error(`[http ${response.status()}] ${response.url()}`);
       }
     });
 
     let ingestPosts = 0;
-    page.on('request', request => {
+    page.on('request', (request) => {
       if (request.url().includes('/ingest/')) ingestPosts += 1;
     });
 

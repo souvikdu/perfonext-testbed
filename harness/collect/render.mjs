@@ -75,9 +75,9 @@ async function collectVariant(client, variant) {
 }
 
 async function main() {
-  const only = process.argv.slice(2).find(arg => arg.startsWith('--only='));
+  const only = process.argv.slice(2).find((arg) => arg.startsWith('--only='));
   const wanted = only ? only.slice('--only='.length) : null;
-  const targets = wanted ? VARIANTS.filter(v => v === wanted) : VARIANTS;
+  const targets = wanted ? VARIANTS.filter((v) => v === wanted) : VARIANTS;
 
   if (targets.length === 0) {
     throw new Error(`unknown variant '${wanted}' (expected baseline or regressed)`);
@@ -105,7 +105,7 @@ async function main() {
   console.log(`\nrender artifacts ready under ${ARTIFACTS}`);
 }
 
-main().catch(error => {
+main().catch((error) => {
   console.error(`\nrender collection failed: ${error.message}`);
   process.exitCode = 1;
 });

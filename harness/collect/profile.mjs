@@ -36,7 +36,7 @@ function run(command, args, options = {}) {
       stdio: 'inherit',
     });
     child.on('error', rejectPromise);
-    child.on('close', code =>
+    child.on('close', (code) =>
       code === 0
         ? resolvePromise()
         : rejectPromise(new Error(`${command} ${args.join(' ')} exited with code ${code}`)),
@@ -61,7 +61,7 @@ function collectFrames(profile) {
 }
 
 async function verifyVariant(outDir, variant) {
-  const entries = (await readdir(outDir)).filter(name => name.endsWith('.cpuprofile'));
+  const entries = (await readdir(outDir)).filter((name) => name.endsWith('.cpuprofile'));
 
   if (entries.length === 0) {
     throw new Error(
@@ -120,7 +120,7 @@ async function verifyVariant(outDir, variant) {
     fileCount: files.length,
     mainThreadFile: mainThread.file,
     mainThreadSamples: mainThread.sampleCount,
-    files: files.map(f => ({ file: f.file, sampleCount: f.sampleCount })),
+    files: files.map((f) => ({ file: f.file, sampleCount: f.sampleCount })),
   };
 }
 
@@ -156,9 +156,9 @@ async function collectVariant(variant) {
 }
 
 async function main() {
-  const only = process.argv.slice(2).find(arg => arg.startsWith('--only='));
+  const only = process.argv.slice(2).find((arg) => arg.startsWith('--only='));
   const wanted = only ? only.slice('--only='.length) : null;
-  const targets = wanted ? VARIANTS.filter(v => v === wanted) : VARIANTS;
+  const targets = wanted ? VARIANTS.filter((v) => v === wanted) : VARIANTS;
 
   if (targets.length === 0) {
     throw new Error(`unknown variant '${wanted}' (expected slow or fast)`);
@@ -180,7 +180,7 @@ async function main() {
   console.log(`\nprofile artifacts ready under ${ARTIFACTS}`);
 }
 
-main().catch(error => {
+main().catch((error) => {
   console.error(`\nprofile collection failed: ${error.message}`);
   process.exitCode = 1;
 });

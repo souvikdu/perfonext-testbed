@@ -71,7 +71,7 @@ export async function connectServer(which, options = {}) {
   const client = new Client({ name: 'perfonext-testbed-harness', version: '0.1.0' }, {});
   await client.connect(transport);
 
-  transport.stderr?.on('data', chunk => process.stderr.write(`[${which}-mcp] ${chunk}`));
+  transport.stderr?.on('data', (chunk) => process.stderr.write(`[${which}-mcp] ${chunk}`));
 
   return {
     client,
@@ -93,8 +93,8 @@ export async function callTool(client, name, args) {
   const response = await client.callTool({ name, arguments: args });
 
   const text = (response.content ?? [])
-    .filter(block => block.type === 'text')
-    .map(block => block.text)
+    .filter((block) => block.type === 'text')
+    .map((block) => block.text)
     .join('\n');
 
   let json = null;
@@ -109,5 +109,5 @@ export async function callTool(client, name, args) {
 
 export async function listToolNames(client) {
   const { tools } = await client.listTools();
-  return tools.map(tool => tool.name).sort();
+  return tools.map((tool) => tool.name).sort();
 }

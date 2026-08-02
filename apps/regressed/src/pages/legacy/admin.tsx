@@ -22,7 +22,13 @@ export default function LegacyAdmin({ trails }: Props) {
       <RegionSummary trails={trails} />
       <table>
         <thead>
-          <tr><th>Slug</th><th>Name</th><th>Region</th><th>Difficulty</th><th>Length</th></tr>
+          <tr>
+            <th>Slug</th>
+            <th>Name</th>
+            <th>Region</th>
+            <th>Difficulty</th>
+            <th>Length</th>
+          </tr>
         </thead>
         <tbody>
           {trails.map((t) => (

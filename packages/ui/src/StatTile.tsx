@@ -1,4 +1,12 @@
-export function StatTile({ label, value, hint }: { label: string; value: string | number; hint?: string }) {
+export function StatTile({
+  label,
+  value,
+  hint,
+}: {
+  label: string;
+  value: string | number;
+  hint?: string;
+}) {
   return (
     <div className="stat-tile">
       <div className="stat-tile__label">{label}</div>

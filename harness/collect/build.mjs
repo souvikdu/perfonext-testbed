@@ -33,6 +33,22 @@ const VARIANTS = [
 
 const MIN_STATS_BYTES = 1_000_000;
 
+// On Windows, `npm` resolves to npm.cmd. Spawning a .cmd file via
+// child_process.spawn() without a shell throws `spawn EINVAL` on Node >= 22, and
+// with a shell it hits the CVE-2024-27980 command validation. Instead of chasing
+// .cmd shims, spawn node.exe with npm's real CLI: npm sets `npm_execpath` in the
+// environment of every script it runs, which covers the documented `npm run
+// collect:*` invocation paths.
+function npmRun(args, options = {}) {
+  const npmCli = process.env.npm_execpath;
+  if (npmCli) {
+    return run(process.execPath, [npmCli, ...args], options);
+  }
+  // Direct invocation outside npm: fall back to a shell on Windows.
+  const command = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+  return run(command, args, { ...options, shell: process.platform === 'win32' });
+}
+
 function run(command, args, options = {}) {
   return new Promise((resolvePromise, rejectPromise) => {
     const child = spawn(command, args, {
@@ -43,17 +59,17 @@ function run(command, args, options = {}) {
 
     let stdout = '';
     let stderr = '';
-    child.stdout.on('data', chunk => {
+    child.stdout.on('data', (chunk) => {
       stdout += chunk;
       process.stdout.write(chunk);
     });
-    child.stderr.on('data', chunk => {
+    child.stderr.on('data', (chunk) => {
       stderr += chunk;
       process.stderr.write(chunk);
     });
 
     child.on('error', rejectPromise);
-    child.on('close', code => {
+    child.on('close', (code) => {
       if (code === 0) {
         resolvePromise({ stdout, stderr });
         return;
@@ -89,7 +105,7 @@ async function verifyStats(statsPath, variant) {
     throw new Error(`[${variant}] stats.json parsed but chunks[] is empty.`);
   }
 
-  const withoutId = chunks.filter(chunk => chunk.id === undefined || chunk.id === null);
+  const withoutId = chunks.filter((chunk) => chunk.id === undefined || chunk.id === null);
   if (withoutId.length > 0) {
     throw new Error(
       `[${variant}] ${withoutId.length}/${chunks.length} chunks have no \`id\`. ` +
@@ -99,7 +115,7 @@ async function verifyStats(statsPath, variant) {
   }
 
   const withReasons = modules.filter(
-    module => Array.isArray(module.reasons) && module.reasons.length > 0,
+    (module) => Array.isArray(module.reasons) && module.reasons.length > 0,
   );
   if (withReasons.length === 0) {
     throw new Error(
@@ -127,7 +143,7 @@ async function collectVariant(variant) {
 
   await rm(join(variant.dir, '.next'), { recursive: true, force: true });
 
-  const { stdout, stderr } = await run('npm', ['run', 'build', '--workspace', variant.workspace], {
+  const { stdout, stderr } = await npmRun(['run', 'build', '--workspace', variant.workspace], {
     env: { ANALYZE: 'true' },
   });
 
@@ -150,7 +166,7 @@ async function collectVariant(variant) {
   // Skip the compiler cache: it is enormous and nothing reads it.
   await cp(nextDir, join(outDir, '.next'), {
     recursive: true,
-    filter: source => !source.includes(`${join('.next', 'cache')}`),
+    filter: (source) => !source.includes(`${join('.next', 'cache')}`),
   });
 
   await writeFile(join(outDir, 'build-output.txt'), `${stdout}\n${stderr}`, 'utf8');
@@ -164,9 +180,9 @@ async function collectVariant(variant) {
 }
 
 async function main() {
-  const only = process.argv.slice(2).find(arg => arg.startsWith('--only='));
+  const only = process.argv.slice(2).find((arg) => arg.startsWith('--only='));
   const wanted = only ? only.slice('--only='.length) : null;
-  const targets = wanted ? VARIANTS.filter(v => v.name === wanted) : VARIANTS;
+  const targets = wanted ? VARIANTS.filter((v) => v.name === wanted) : VARIANTS;
 
   if (targets.length === 0) {
     throw new Error(`unknown variant '${wanted}' (expected baseline or regressed)`);
@@ -188,7 +204,7 @@ async function main() {
   console.log(`\nbuild artifacts ready under ${ARTIFACTS}`);
 }
 
-main().catch(error => {
+main().catch((error) => {
   console.error(`\nbuild collection failed: ${error.message}`);
   process.exitCode = 1;
 });

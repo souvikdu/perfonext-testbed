@@ -117,9 +117,7 @@
       "target": "regressed",
       "expectedFail": true,
       "why": "extractPackageName takes the LAST node_modules segment, so next/dist/compiled/react-dom buckets as 'next'. See perfonext-build-mcp/REVIEW.md H2.",
-      "assert": [
-        { "path": "duplicates[*].packageName", "op": "includes", "value": "react-dom" }
-      ]
+      "assert": [{ "path": "duplicates[*].packageName", "op": "includes", "value": "react-dom" }]
     },
     {
       "id": "B8b",
