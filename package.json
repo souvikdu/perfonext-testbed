@@ -18,9 +18,22 @@
     "harness:build": "node harness/run.mjs --lane=build",
     "harness:profiler": "node harness/run.mjs --lane=profiler",
     "harness:render": "node harness/run.mjs --lane=render",
-    "clean": "rm -rf artifacts apps/*/.next apps/*/.next-* harness/reports"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "clean": "shx rm -rf artifacts \"apps/*/.next\" \"apps/*/.next-*\" harness/reports fixtures/adversarial"
   },
   "engines": {
     "node": ">=20.10.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "eslint": "^9.17.0",
+    "eslint-config-prettier": "^10.0.1",
+    "globals": "^15.14.0",
+    "prettier": "^3.4.2",
+    "shx": "^0.4.0",
+    "typescript-eslint": "^8.18.2"
   }
 }

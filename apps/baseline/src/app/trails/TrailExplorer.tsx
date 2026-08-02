@@ -10,7 +10,11 @@ export type Filters = { query: string; region: string; difficulty: string };
 
 const EMPTY_FILTERS: Filters = { query: '', region: 'all', difficulty: 'all' };
 
-function TrailExplorerImpl({ trails, regions, difficulties }: {
+function TrailExplorerImpl({
+  trails,
+  regions,
+  difficulties,
+}: {
   trails: Trail[];
   regions: string[];
   difficulties: string[];

@@ -24,7 +24,13 @@ export default function LegacyAdmin({ trails }: Props) {
       <h1>Legacy admin</h1>
       <table>
         <thead>
-          <tr><th>Slug</th><th>Name</th><th>Region</th><th>Difficulty</th><th>Length</th></tr>
+          <tr>
+            <th>Slug</th>
+            <th>Name</th>
+            <th>Region</th>
+            <th>Difficulty</th>
+            <th>Length</th>
+          </tr>
         </thead>
         <tbody>
           {trails.map((t) => (

@@ -31,7 +31,12 @@ export default function StatsPage() {
       <h2>Rollup</h2>
       <table>
         <thead>
-          <tr><th>Region</th><th>Trails</th><th>Distance</th><th>Gain</th></tr>
+          <tr>
+            <th>Region</th>
+            <th>Trails</th>
+            <th>Distance</th>
+            <th>Gain</th>
+          </tr>
         </thead>
         <tbody>
           {rollup.map((r: any) => (

@@ -32,5 +32,12 @@ export function runWorkload(trails, variant = 'slow') {
   };
 }
 
-export { scoreAll, findNearbyTrails, aggregateByRegion, rollupTree, extractSeasons, buildTrailReport };
+export {
+  scoreAll,
+  findNearbyTrails,
+  aggregateByRegion,
+  rollupTree,
+  extractSeasons,
+  buildTrailReport,
+};
 export { fast };

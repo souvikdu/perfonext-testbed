@@ -4,7 +4,12 @@ import { memo } from 'react';
 
 import type { Filters } from './TrailExplorer';
 
-function FilterBarImpl({ filters, regions, difficulties, onFilterChange }: {
+function FilterBarImpl({
+  filters,
+  regions,
+  difficulties,
+  onFilterChange,
+}: {
   filters: Filters;
   regions: string[];
   difficulties: string[];
@@ -25,7 +30,9 @@ function FilterBarImpl({ filters, regions, difficulties, onFilterChange }: {
       >
         <option value="all">All regions</option>
         {regions.map((r) => (
-          <option key={r} value={r}>{r}</option>
+          <option key={r} value={r}>
+            {r}
+          </option>
         ))}
       </select>
       <select
@@ -35,7 +42,9 @@ function FilterBarImpl({ filters, regions, difficulties, onFilterChange }: {
       >
         <option value="all">All difficulties</option>
         {difficulties.map((d) => (
-          <option key={d} value={d}>{d}</option>
+          <option key={d} value={d}>
+            {d}
+          </option>
         ))}
       </select>
     </div>

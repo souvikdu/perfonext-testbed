@@ -42,12 +42,34 @@ export const FEATURES = [
 const SURFACES = ['dirt', 'rock', 'gravel', 'boardwalk', 'sand', 'snow'];
 
 const NAME_HEADS = [
-  'Granite', 'Cedar', 'Silver', 'Copper', 'Hollow', 'Raven', 'Thunder',
-  'Aspen', 'Basalt', 'Juniper', 'Marble', 'Quiet', 'Bitter', 'Elk',
+  'Granite',
+  'Cedar',
+  'Silver',
+  'Copper',
+  'Hollow',
+  'Raven',
+  'Thunder',
+  'Aspen',
+  'Basalt',
+  'Juniper',
+  'Marble',
+  'Quiet',
+  'Bitter',
+  'Elk',
 ];
 const NAME_TAILS = [
-  'Ridge', 'Loop', 'Falls', 'Pass', 'Spur', 'Basin', 'Traverse',
-  'Notch', 'Bench', 'Gulch', 'Crossing', 'Rim',
+  'Ridge',
+  'Loop',
+  'Falls',
+  'Pass',
+  'Spur',
+  'Basin',
+  'Traverse',
+  'Notch',
+  'Bench',
+  'Gulch',
+  'Crossing',
+  'Rim',
 ];
 
 function pick(rng, arr) {
@@ -91,8 +113,9 @@ function makeTrail(rng, index) {
     reviews.push({
       rating: 1 + Math.floor(rng() * 5),
       words: 20 + Math.floor(rng() * 180),
-      body: `Hiked ${name} in ${pick(rng, ['spring', 'summer', 'fall', 'winter'])}. `
-        + `Tread was ${pick(rng, SURFACES)}. Would ${rng() > 0.3 ? '' : 'not '}return.`,
+      body:
+        `Hiked ${name} in ${pick(rng, ['spring', 'summer', 'fall', 'winter'])}. ` +
+        `Tread was ${pick(rng, SURFACES)}. Would ${rng() > 0.3 ? '' : 'not '}return.`,
     });
   }
 
@@ -111,8 +134,9 @@ function makeTrail(rng, index) {
     features,
     segments,
     reviews,
-    description: `${name} climbs through the ${pick(rng, REGIONS)} with `
-      + `${featureCount} notable features and ${segmentCount} mapped segments.`,
+    description:
+      `${name} climbs through the ${pick(rng, REGIONS)} with ` +
+      `${featureCount} notable features and ${segmentCount} mapped segments.`,
   };
 }
 

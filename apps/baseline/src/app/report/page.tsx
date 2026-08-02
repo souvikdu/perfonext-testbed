@@ -21,7 +21,11 @@ export default function ReportPage() {
       <ChartLoader data={rows} />
       <table>
         <thead>
-          <tr><th>Region</th><th>Trails</th><th>Distance</th></tr>
+          <tr>
+            <th>Region</th>
+            <th>Trails</th>
+            <th>Distance</th>
+          </tr>
         </thead>
         <tbody>
           {rows.map((row) => (

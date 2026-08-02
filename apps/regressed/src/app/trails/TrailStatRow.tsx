@@ -2,7 +2,14 @@
 
 import { TrailBadge } from '@testbed/ui';
 
-export function TrailStatRow({ distance, gain, difficulty, features, summary, theme }: {
+export function TrailStatRow({
+  distance,
+  gain,
+  difficulty,
+  features,
+  summary,
+  theme,
+}: {
   distance: string;
   gain: number;
   difficulty: string;
@@ -15,7 +22,9 @@ export function TrailStatRow({ distance, gain, difficulty, features, summary, th
       {distance} · {gain} m · {difficulty} · {summary.vocabulary} words
       <div>
         {features.map((f) => (
-          <TrailBadge key={f} tone={theme.tone}>{f}</TrailBadge>
+          <TrailBadge key={f} tone={theme.tone}>
+            {f}
+          </TrailBadge>
         ))}
       </div>
     </div>

@@ -6,7 +6,12 @@ import { TrailGroup } from './TrailGroup';
 
 // Regrouped from scratch on every render (no useMemo), and every TrailGroup gets a
 // brand-new array plus a brand-new arrow prop.
-export function TrailList({ trails, selected, onSelect, theme }: {
+export function TrailList({
+  trails,
+  selected,
+  onSelect,
+  theme,
+}: {
   trails: Trail[];
   selected: string | null;
   onSelect: (slug: string) => void;

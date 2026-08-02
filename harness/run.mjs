@@ -32,7 +32,7 @@ function resolvePath(root, path) {
     const match = segment.match(/^([^[]+)\[(\*|\d+)\]$/);
     const key = match ? match[1] : segment;
 
-    current = current.flatMap(value => {
+    current = current.flatMap((value) => {
       if (value === null || value === undefined) return [];
       const next = value[key];
       return next === undefined ? [] : [next];
@@ -41,8 +41,8 @@ function resolvePath(root, path) {
     if (match) {
       current =
         match[2] === '*'
-          ? current.flatMap(value => (Array.isArray(value) ? value : [value]))
-          : current.flatMap(value => {
+          ? current.flatMap((value) => (Array.isArray(value) ? value : [value]))
+          : current.flatMap((value) => {
               const picked = Array.isArray(value) ? value[Number(match[2])] : undefined;
               return picked === undefined ? [] : [picked];
             });
@@ -79,7 +79,7 @@ const CUSTOM = {
   // The window must actually contain the ticks it is reporting.
   hotLinesVisible(json) {
     const lines = json?.lines ?? [];
-    const withTicks = lines.filter(line => line.ticks > 0);
+    const withTicks = lines.filter((line) => line.ticks > 0);
     const total = json?.totalTicks ?? 0;
     const shown = withTicks.reduce((sum, line) => sum + line.ticks, 0);
     return {
@@ -91,9 +91,7 @@ const CUSTOM = {
 
 /** JS has no inline (?i) flag, so translate the prefix into a real flag. */
 function toRegExp(pattern) {
-  return pattern.startsWith('(?i)')
-    ? new RegExp(pattern.slice(4), 'i')
-    : new RegExp(pattern);
+  return pattern.startsWith('(?i)') ? new RegExp(pattern.slice(4), 'i') : new RegExp(pattern);
 }
 
 function evaluate(assertion, ctx) {
@@ -116,21 +114,21 @@ function evaluate(assertion, ctx) {
 
   switch (op) {
     case 'includes':
-      return { pass: found.some(v => String(v) === String(value)), detail };
+      return { pass: found.some((v) => String(v) === String(value)), detail };
     case 'notIncludes':
-      return { pass: !found.some(v => String(v) === String(value)), detail };
+      return { pass: !found.some((v) => String(v) === String(value)), detail };
     case 'equals':
       return { pass: found.length > 0 && String(found[0]) === String(value), detail };
     case 'matches':
-      return { pass: found.some(v => toRegExp(value).test(String(v))), detail };
+      return { pass: found.some((v) => toRegExp(value).test(String(v))), detail };
     case 'gt':
-      return { pass: found.some(v => Number(v) > value), detail };
+      return { pass: found.some((v) => Number(v) > value), detail };
     case 'gte':
-      return { pass: found.some(v => Number(v) >= value), detail };
+      return { pass: found.some((v) => Number(v) >= value), detail };
     case 'lt':
-      return { pass: found.some(v => Number(v) < value), detail };
+      return { pass: found.some((v) => Number(v) < value), detail };
     case 'lte':
-      return { pass: found.some(v => Number(v) <= value), detail };
+      return { pass: found.some((v) => Number(v) <= value), detail };
     case 'lengthGte': {
       const arr = found[0];
       return { pass: Array.isArray(arr) && arr.length >= value, detail };
@@ -187,12 +185,12 @@ async function buildLane(manifest, results) {
 
 async function profilerLane(manifest, results) {
   const summary = JSON.parse(await readFile(join(ARTIFACTS, 'profile', 'summary.json'), 'utf8'));
-  const mainFile = variant =>
+  const mainFile = (variant) =>
     join(
       ARTIFACTS,
       'profile',
       variant,
-      summary.results.find(r => r.variant === variant).mainThreadFile,
+      summary.results.find((r) => r.variant === variant).mainThreadFile,
     );
 
   const { client, close } = await connectServer('profiler');
@@ -245,7 +243,7 @@ async function renderLane(manifest, results) {
 
 async function adversarialLane(manifest, results) {
   const fixtures = JSON.parse(await readFile(join(FIXTURES, 'manifest.json'), 'utf8'));
-  const byId = Object.fromEntries(fixtures.fixtures.map(f => [f.id, f]));
+  const byId = Object.fromEntries(fixtures.fixtures.map((f) => [f.id, f]));
 
   const clients = {};
   try {
@@ -270,7 +268,7 @@ async function adversarialLane(manifest, results) {
       check({ ...entry, lane: 'adversarial' }, ctx, results);
     }
   } finally {
-    await Promise.all(Object.values(clients).map(c => c.close()));
+    await Promise.all(Object.values(clients).map((c) => c.close()));
   }
 }
 
@@ -284,7 +282,7 @@ const LANES = {
 };
 
 async function main() {
-  const laneArg = process.argv.find(a => a.startsWith('--lane='));
+  const laneArg = process.argv.find((a) => a.startsWith('--lane='));
   const wanted = laneArg ? [laneArg.slice('--lane='.length)] : Object.keys(LANES);
 
   const manifest = JSON.parse(await readFile(join(HERE, 'expected-findings.json'), 'utf8'));
@@ -297,7 +295,13 @@ async function main() {
       await LANES[lane](manifest, results);
     } catch (error) {
       console.error(`  ${lane} lane aborted: ${error.message}`);
-      results.push({ id: `${lane}-lane`, lane, state: 'FAIL', title: 'lane aborted', failures: [error.message] });
+      results.push({
+        id: `${lane}-lane`,
+        lane,
+        state: 'FAIL',
+        title: 'lane aborted',
+        failures: [error.message],
+      });
     }
   }
 
@@ -314,7 +318,7 @@ async function main() {
     for (const f of r.failures) console.log(`             ${f}`);
   }
 
-  const tally = key => results.filter(r => r.state === key).length;
+  const tally = (key) => results.filter((r) => r.state === key).length;
   console.log(
     `\npass=${tally('pass')}  known-bug=${tally('known-bug')}  no-fixture=${tally('PENDING')}  newly-fixed=${tally('FIXED')}  fail=${tally('FAIL')}`,
   );
@@ -341,7 +345,7 @@ if (!existsSync(ARTIFACTS)) {
   process.exit(1);
 }
 
-main().catch(error => {
+main().catch((error) => {
   console.error(`harness failed: ${error.message}`);
   process.exitCode = 1;
 });

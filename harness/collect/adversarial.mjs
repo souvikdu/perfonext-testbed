@@ -18,7 +18,7 @@ const OUT = join(ROOT, 'fixtures', 'adversarial');
 async function readProfileSummary() {
   const raw = await readFile(join(ARTIFACTS, 'profile', 'summary.json'), 'utf8');
   const summary = JSON.parse(raw);
-  const slow = summary.results.find(r => r.variant === 'slow');
+  const slow = summary.results.find((r) => r.variant === 'slow');
   return join(ARTIFACTS, 'profile', 'slow', slow.mainThreadFile);
 }
 
@@ -58,7 +58,11 @@ async function collapsedStats() {
   await mkdir(dir, { recursive: true });
 
   const realBuild = join(ARTIFACTS, 'build', 'regressed', '.next');
-  for (const file of ['build-manifest.json', 'app-build-manifest.json', 'prerender-manifest.json']) {
+  for (const file of [
+    'build-manifest.json',
+    'app-build-manifest.json',
+    'prerender-manifest.json',
+  ]) {
     await cp(join(realBuild, file), join(dir, file));
   }
 
@@ -67,6 +71,8 @@ async function collapsedStats() {
     join(dir, 'stats.json'),
     JSON.stringify({
       ...stats,
+      // Intentionally strips chunk ids to build the collapsed-stats fixture.
+      // eslint-disable-next-line no-unused-vars
       chunks: (stats.chunks ?? []).map(({ id, ...rest }) => rest),
       modules: [{ name: '953 modules', size: 4_000_000, modules: undefined, reasons: [] }],
     }),
@@ -125,7 +131,7 @@ async function main() {
   console.log(`\nadversarial fixtures ready under ${OUT}`);
 }
 
-main().catch(error => {
+main().catch((error) => {
   console.error(`adversarial generation failed: ${error.message}`);
   process.exitCode = 1;
 });
