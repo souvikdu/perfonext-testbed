@@ -152,8 +152,7 @@
       "title": "read_source_context shows the lines that actually carry the ticks",
       "tool": "read_source_context",
       "target": "slow",
-      "expectedFail": true,
-      "why": "scoreTrail is declared at line 31 but its hot lines are 63-82. The window is a fixed +/-10 around the declaration and explain_function hardcodes it with no override, so the output is all-zero ticks with no warning. See perfonext-profiler-mcp/REVIEW.md H1.",
+      "why": "Fixed in profiler-mcp v0.6.0: the window is now sized from the actual tick extent (scoped to the primary node's file) instead of a fixed +/-10 around the declaration, and a hiddenTicks/warning field reports any ticks still outside it. See perfonext-profiler-mcp/REVIEW.md H1 (resolved).",
       "assert": [{ "path": "$custom", "op": "hotLinesVisible" }]
     },
     {
@@ -180,12 +179,14 @@
     },
     {
       "id": "P8",
-      "title": "A directory of profiles is accepted",
+      "title": "A directory is rejected with a clear, actionable error",
       "tool": "load_profile",
       "target": "slow-dir",
-      "expectedFail": true,
-      "why": "One run with worker_threads emits three .cpuprofile files. load_profile takes a single filePath, so the caller must pick the main thread by hand. This is the deferred multi-file roadmap item; the fixture shows the need is real.",
-      "assert": [{ "path": "$response", "op": "noError" }]
+      "why": "load_profile intentionally accepts only a single profile file path — multi-file/directory ingestion is a deferred roadmap item (auto-selecting a 'main thread' by sample count was rejected as unreliable, since CPU-bound work is often offloaded to worker_threads). A directory input is a user error, not a case to enumerate or recover from; v0.6.0 replaced the raw EISDIR message with a clear one explaining the single-file contract.",
+      "assert": [
+        { "path": "$response", "op": "isError" },
+        { "path": "$text", "op": "matches", "value": "single profile file path" }
+      ]
     }
   ],
 
@@ -254,8 +255,7 @@
       "server": "profiler",
       "tool": "load_profile",
       "fixture": "x2-zero-sample-profile",
-      "expectedFail": true,
-      "why": "Fails with a raw internal TypeError: 'Cannot read properties of undefined (reading selfTime)'. A profile with no samples is exactly what a mis-collected run produces, so this is the first thing a new user is likely to hit, and the message tells them nothing about what went wrong or how to fix it.",
+      "why": "Fixed in profiler-mcp v0.6.0: computeTotalTime no longer uses a non-null assertion on a dangling child id (the actual crash cause — 'Cannot read properties of undefined (reading selfTime)'), so a profile with no samples now loads successfully and reports sampleCount: 0.",
       "assert": [{ "path": "$response", "op": "noError" }]
     },
     {
