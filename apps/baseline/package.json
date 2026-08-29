@@ -13,7 +13,7 @@
     "@testbed/data": "0.1.0",
     "@testbed/ui": "0.1.0",
     "jspdf": "2.5.2",
-    "lodash": "4.17.21",
+    "lodash": "4.18.1",
     "next": "16.2.12",
     "react": "19.0.0",
     "react-dom": "19.0.0",
@@ -21,7 +21,7 @@
     "recharts": "2.13.3"
   },
   "devDependencies": {
-    "@types/lodash": "4.17.13",
+    "@types/lodash": "4.17.25",
     "@types/node": "26.1.2",
     "@types/react": "19.0.1",
     "@types/react-dom": "19.0.2",
