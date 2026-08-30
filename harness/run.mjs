@@ -57,22 +57,52 @@ function resolvePath(root, path) {
  * declarative.
  */
 const CUSTOM = {
-  // A package cannot be bigger than the chunk it lives in. Fails today because module
-  // sizes are raw and chunk sizes are emitted.
+  // A package cannot be bigger than the chunk it lives in. Both sides must be on the
+  // emitted scale: module bytes are raw and unminified, so comparing them to an emitted
+  // chunk size proves nothing.
   packageBytesWithinChunk(json) {
     const offenders = [];
+    let compared = 0;
     for (const chunk of json?.sharedChunks ?? []) {
       for (const pkg of chunk.topPackages ?? []) {
-        if (typeof pkg.bytes === 'number' && pkg.bytes > chunk.sizeBytes) {
+        if (typeof pkg.emittedBytes !== 'number' || typeof chunk.emittedSizeBytes !== 'number') {
+          continue;
+        }
+        compared++;
+        if (pkg.emittedBytes > chunk.emittedSizeBytes) {
           offenders.push(
-            `${pkg.packageName} ${pkg.bytes}B inside ${chunk.chunkPath} of ${chunk.sizeBytes}B`,
+            `${pkg.packageName} ${pkg.emittedBytes}B inside ${chunk.chunkPath} of ${chunk.emittedSizeBytes}B`,
           );
         }
       }
     }
+    // Guard against the fields being renamed away again: no comparisons is not a pass.
+    if (compared === 0) {
+      return {
+        pass: false,
+        detail: 'no package/chunk pair exposed comparable emitted byte counts',
+      };
+    }
     return {
       pass: offenders.length === 0,
-      detail: offenders.length ? offenders[0] : 'all packages fit within their chunk',
+      detail: offenders.length
+        ? offenders[0]
+        : `all ${compared} packages fit within their emitted chunk`,
+    };
+  },
+
+  // One function must occupy one row, however many call-tree nodes it was sampled under.
+  hotspotsMergeCallSites(json) {
+    const rows = json?.hotspots ?? [];
+    const keys = rows.map((row) => `${row.function}::${row.file}::${row.line}`);
+    const duplicated = keys.filter((key, index) => keys.indexOf(key) !== index);
+    const merged = rows.filter((row) => (row.occurrences ?? 0) > 1);
+    if (duplicated.length > 0) {
+      return { pass: false, detail: `same function listed twice: ${duplicated[0]}` };
+    }
+    return {
+      pass: rows.length > 0 && merged.length > 0,
+      detail: `${merged.length} of ${rows.length} rows merged more than one call-tree node`,
     };
   },
 
