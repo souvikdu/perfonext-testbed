@@ -45,9 +45,10 @@
       "title": "A package dominating a widely-shared chunk is identified",
       "tool": "explain_shared_chunks",
       "target": "regressed",
+      "why": "Chunk size is reported as emittedSizeBytes (the on-disk size) to keep it distinct from the unminified module bytes attributed to each package.",
       "assert": [
         { "path": "sharedChunks[0].routeCount", "op": "gte", "value": 5 },
-        { "path": "sharedChunks[0].sizeBytes", "op": "gt", "value": 200000 }
+        { "path": "sharedChunks[0].emittedSizeBytes", "op": "gt", "value": 200000 }
       ]
     },
     {
@@ -124,8 +125,7 @@
       "title": "A package is never reported as larger than the chunk containing it",
       "tool": "explain_shared_chunks",
       "target": "regressed",
-      "expectedFail": true,
-      "why": "topPackages.bytes is raw unminified module size while sizeBytes is the emitted chunk size. See perfonext-build-mcp/REVIEW.md H1.",
+      "why": "Fixed in build-mcp v0.5.0: each package now also reports emittedBytes, its share of the chunk's module bytes applied to the chunk's emitted size, so package size and chunk size are finally on the same scale. See perfonext-build-mcp/REVIEW.md H1 (resolved).",
       "assert": [{ "path": "$custom", "op": "packageBytesWithinChunk" }]
     },
     {
@@ -133,8 +133,7 @@
       "title": "The synthetic /layout key is not reported as a user-facing route",
       "tool": "get_largest_routes",
       "target": "regressed",
-      "expectedFail": true,
-      "why": "app-build-manifest.json records root-layout client components under a /layout key. It is not a route, and counting it also gives layout-mounted chunks routeCount 1 so they never register as shared.",
+      "why": "Fixed in build-mcp v0.5.0: the App Router /layout key is no longer emitted as a route, and its chunks are redistributed into every App Router route so layout-mounted code registers as shared instead of route-exclusive.",
       "assert": [{ "path": "routes[*].path", "op": "notIncludes", "value": "/layout" }]
     }
   ],
@@ -161,6 +160,14 @@
       "tool": "get_hotspots",
       "target": "slow",
       "assert": [{ "path": "hotspots[*].function", "op": "includes", "value": "findNearbyTrails" }]
+    },
+    {
+      "id": "P2-identity",
+      "title": "A function sampled under several callers occupies one hotspot row",
+      "tool": "get_hotspots",
+      "target": "slow",
+      "why": "Sampling splits one function across many call-tree nodes. Reporting each node separately understates every one of them and spends several of the limited result slots on the same function.",
+      "assert": [{ "path": "$custom", "op": "hotspotsMergeCallSites" }]
     },
     {
       "id": "P5",
@@ -196,7 +203,8 @@
       "title": "Baseline produces far fewer commits than regressed",
       "tool": "get_render_summary",
       "target": "baseline",
-      "assert": [{ "path": "commitCount", "op": "lt", "value": 30 }]
+      "why": "Thresholds bracket the recorded captures: baseline commits 18, regressed 27. Re-check both R0-control and R1 whenever artifacts/render is re-collected, since the interaction script drives the commit count.",
+      "assert": [{ "path": "commitCount", "op": "lt", "value": 20 }]
     },
     {
       "id": "R-quality",
@@ -211,7 +219,8 @@
       "title": "The rerender storm is visible as a much higher commit count",
       "tool": "get_render_summary",
       "target": "regressed",
-      "assert": [{ "path": "commitCount", "op": "gte", "value": 30 }]
+      "why": "Paired with R0-control; see its note on threshold calibration.",
+      "assert": [{ "path": "commitCount", "op": "gte", "value": 20 }]
     },
     {
       "id": "R2",
