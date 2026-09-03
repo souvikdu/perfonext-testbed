@@ -27,9 +27,14 @@ npm run harness:render
 ```
 
 The render lane launches headed Chromium. Install it once with `npx playwright install chromium`.
-Headless Chromium does not expose the React profiling channel, so it cannot produce exact
-rerender causes. The profiling build is also required: a normal `next start` build can complete a
-capture with zero commits and no useful diagnostic.
+Headless capture is just as exact, but headless Chromium pins `requestAnimationFrame` to 60Hz, so it
+records fewer animation-driven commits than the commit-count thresholds are calibrated for. The
+profiling build is required either way: a normal `next start` build can complete a capture with zero
+commits and no useful diagnostic.
+
+Optional headless capture is `PERFONEXT_RENDER_HEADLESS=1 npm run harness:render` (or the same env
+on `npm run collect:render`). Headless stays exact; commit-count thresholds are still calibrated for
+headed.
 
 ## Results
 

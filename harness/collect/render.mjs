@@ -25,7 +25,11 @@ const VARIANTS = ['baseline', 'regressed'];
 
 async function collectVariant(client, variant) {
   console.log(`\n=== capturing ${variant}`);
-  const captured = await captureRenderSession({ client, variant });
+  const captured = await captureRenderSession({
+    client,
+    variant,
+    headless: process.env.PERFONEXT_RENDER_HEADLESS === '1',
+  });
 
   const summary = await callTool(client, 'get_render_summary', { profileId: captured.profileId });
   const slow = await callTool(client, 'get_slow_components', {
@@ -67,7 +71,7 @@ async function collectVariant(client, variant) {
   if (captured.dataQuality !== 'exact') {
     console.warn(
       `--- ${variant}: dataQuality is '${captured.dataQuality}', not 'exact'. ` +
-        'Exact causes need a headed browser and react-scan changeDescription data.',
+        'Exact causes need react-scan changeDescription data and a React profiling build.',
     );
   }
 

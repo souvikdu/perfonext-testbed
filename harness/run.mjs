@@ -57,18 +57,29 @@ function resolvePath(root, path) {
  * declarative.
  */
 const CUSTOM = {
-  // A package cannot be bigger than the chunk it lives in. Fails today because module
-  // sizes are raw and chunk sizes are emitted.
+  // A package cannot be bigger than the chunk it lives in. Compares emitted
+  // package bytes against the chunk's emitted size, not raw webpack module size.
   packageBytesWithinChunk(json) {
     const offenders = [];
+    let compared = 0;
     for (const chunk of json?.sharedChunks ?? []) {
       for (const pkg of chunk.topPackages ?? []) {
-        if (typeof pkg.bytes === 'number' && pkg.bytes > chunk.sizeBytes) {
+        if (typeof pkg.emittedBytes !== 'number' || typeof chunk.emittedSizeBytes !== 'number') {
+          continue;
+        }
+        compared += 1;
+        if (pkg.emittedBytes > chunk.emittedSizeBytes) {
           offenders.push(
-            `${pkg.packageName} ${pkg.bytes}B inside ${chunk.chunkPath} of ${chunk.sizeBytes}B`,
+            `${pkg.packageName} ${pkg.emittedBytes}B inside ${chunk.chunkPath} of ${chunk.emittedSizeBytes}B`,
           );
         }
       }
+    }
+    if (compared === 0) {
+      return {
+        pass: false,
+        detail: 'no package/chunk pair exposed comparable emitted byte counts',
+      };
     }
     return {
       pass: offenders.length === 0,
@@ -224,8 +235,14 @@ async function renderLane(manifest, results) {
   try {
     const ids = {};
     for (const variant of ['baseline', 'regressed']) {
-      console.log(`  capturing ${variant} (a headed browser will open)`);
-      const captured = await captureRenderSession({ client, variant });
+      const headless = process.env.PERFONEXT_RENDER_HEADLESS === '1';
+      console.log(
+        `  capturing ${variant} (${headless ? 'headless Chromium' : 'a headed browser will open'})`,
+      );
+      const captured = await captureRenderSession({ client, variant, headless });
+      console.log(
+        `  ${variant}: commitCount=${captured.commitCount} componentCount=${captured.componentCount} dataQuality=${captured.dataQuality}`,
+      );
       ids[variant] = captured.profileId;
     }
 

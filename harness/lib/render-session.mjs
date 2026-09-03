@@ -6,9 +6,11 @@
 // a render profile has to be the same process that captured it.
 //
 // Two operational facts drive the shape of this file:
-//   1. Playwright MUST run headed. React's profiling hooks are not installed in
-//      headless Chromium, so changeDescription comes back null and dataQuality
-//      silently degrades from 'exact' to 'heuristic'.
+//   1. Playwright runs headed by default, and the expected-findings commit-count
+//      thresholds are calibrated against that. Headless capture is equally exact
+//      (react-scan/lite installs the profiling hook itself), but headless Chromium pins
+//      requestAnimationFrame to 60Hz, so the animation-driven commits produced by the
+//      interaction script roughly halve on a 120Hz display and undershoot the R1 bound.
 //   2. The instrumentation reads window.__PERFONEXT__, injected via addInitScript, so
 //      the app does not need rebuilding per session.
 
@@ -55,6 +57,20 @@ async function startApp(variant) {
     throw new Error(`unknown app variant '${variant}'`);
   }
 
+  const baseUrl = `http://127.0.0.1:${app.port}`;
+  try {
+    const response = await fetch(baseUrl, { signal: AbortSignal.timeout(1_000) });
+    if (response.ok) {
+      throw new Error(
+        `${baseUrl} is already serving. Stop the leftover process on port ${app.port} before the render lane.`,
+      );
+    }
+  } catch (error) {
+    if (String(error.message).includes('already serving')) {
+      throw error;
+    }
+  }
+
   const nextBin = join(ROOT, 'node_modules', 'next', 'dist', 'bin', 'next');
   const child = spawn(process.execPath, [nextBin, 'start'], {
     cwd: app.dir,
@@ -63,15 +79,25 @@ async function startApp(variant) {
   });
 
   child.stdout.on('data', () => {});
-  child.stderr.on('data', (chunk) => process.stderr.write(chunk));
+  let stderrText = '';
+  child.stderr.on('data', (chunk) => {
+    stderrText += String(chunk);
+    process.stderr.write(chunk);
+  });
 
-  const baseUrl = `http://127.0.0.1:${app.port}`;
   try {
     await waitForServer(baseUrl);
   } catch (error) {
     child.kill('SIGTERM');
     throw new Error(
       `${error.message}. Did you run the build lane first? \`next start\` needs a .next directory.`,
+    );
+  }
+
+  if (/EADDRINUSE/i.test(stderrText)) {
+    child.kill('SIGTERM');
+    throw new Error(
+      `${baseUrl} was already in use (EADDRINUSE). Stop the leftover next-server on port ${app.port} and retry.`,
     );
   }
 
@@ -169,7 +195,8 @@ async function driveInteractions(page, baseUrl) {
  * @param {object} options
  * @param {import('@modelcontextprotocol/sdk/client/index.js').Client} options.client connected render-mcp client
  * @param {'baseline'|'regressed'} options.variant
- * @param {boolean} [options.headless] escape hatch; defaults to false and should stay false
+ * @param {boolean} [options.headless] data quality is unaffected, but commit counts drop
+ *   (see the note at the top of this file); defaults to false to match the calibrated thresholds
  */
 export async function captureRenderSession({ client, variant, headless = false }) {
   const begin = await callTool(client, 'begin_render_analysis', { approach: 'live' });
@@ -241,8 +268,8 @@ export async function captureRenderSession({ client, variant, headless = false }
 
   if (headless) {
     console.warn(
-      'WARNING: captured headless. React does not install profiling hooks in headless ' +
-        'Chromium, so changeDescription will be null and dataQuality will be "heuristic".',
+      'NOTE: captured headless. dataQuality is still "exact", but requestAnimationFrame is ' +
+        'pinned to 60Hz, so commit counts run lower than the calibrated thresholds expect.',
     );
   }
 

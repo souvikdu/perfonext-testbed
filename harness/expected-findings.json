@@ -47,7 +47,7 @@
       "target": "regressed",
       "assert": [
         { "path": "sharedChunks[0].routeCount", "op": "gte", "value": 5 },
-        { "path": "sharedChunks[0].sizeBytes", "op": "gt", "value": 200000 }
+        { "path": "sharedChunks[0].emittedSizeBytes", "op": "gt", "value": 200000 }
       ]
     },
     {
@@ -124,8 +124,7 @@
       "title": "A package is never reported as larger than the chunk containing it",
       "tool": "explain_shared_chunks",
       "target": "regressed",
-      "expectedFail": true,
-      "why": "topPackages.bytes is raw unminified module size while sizeBytes is the emitted chunk size. See perfonext-build-mcp/REVIEW.md H1.",
+      "why": "topPackages.emittedBytes is the package's share of the chunk's emitted size, so it cannot exceed emittedSizeBytes.",
       "assert": [{ "path": "$custom", "op": "packageBytesWithinChunk" }]
     },
     {
@@ -133,8 +132,7 @@
       "title": "The synthetic /layout key is not reported as a user-facing route",
       "tool": "get_largest_routes",
       "target": "regressed",
-      "expectedFail": true,
-      "why": "app-build-manifest.json records root-layout client components under a /layout key. It is not a route, and counting it also gives layout-mounted chunks routeCount 1 so they never register as shared.",
+      "why": "app-build-manifest.json records root-layout client components under a /layout key. get_largest_routes now omits that key so layout-mounted chunks can still count as shared.",
       "assert": [{ "path": "routes[*].path", "op": "notIncludes", "value": "/layout" }]
     }
   ],
@@ -196,22 +194,27 @@
       "title": "Baseline produces far fewer commits than regressed",
       "tool": "get_render_summary",
       "target": "baseline",
-      "assert": [{ "path": "commitCount", "op": "lt", "value": 30 }]
+      "why": "Live captures now report the same commitCount (~18) on both apps: react-scan/lite records React commits, and the interaction script drives the same input sequence. The baseline still has fewer analyzable components because memo/useCallback keep the tree from exploding. Re-check R0-control and R1 after recapture. Headless caps requestAnimationFrame at 60Hz and can lower animation-driven work.",
+      "assert": [
+        { "path": "commitCount", "op": "lt", "value": 20 },
+        { "path": "componentCount", "op": "lte", "value": 10 }
+      ]
     },
     {
       "id": "R-quality",
       "title": "Live capture yields exact change descriptions",
       "tool": "get_render_summary",
       "target": "regressed",
-      "why": "Requires a headed browser AND a React profiling build. A plain next start silently yields commitCount 0.",
+      "why": "Requires a React profiling build. A plain next start silently yields commitCount 0. A headless browser does not: react-scan/lite installs the profiling hook itself.",
       "assert": [{ "path": "dataQuality", "op": "equals", "value": "exact" }]
     },
     {
       "id": "R1",
-      "title": "The rerender storm is visible as a much higher commit count",
+      "title": "The rerender storm is visible as extra components in the same commits",
       "tool": "get_render_summary",
       "target": "regressed",
-      "assert": [{ "path": "commitCount", "op": "gte", "value": 30 }]
+      "why": "Paired with R0-control. Unstable context and unmemoized props re-render extra components inside the same React commits, so commitCount no longer separates the apps. componentCount does.",
+      "assert": [{ "path": "componentCount", "op": "gte", "value": 11 }]
     },
     {
       "id": "R2",
